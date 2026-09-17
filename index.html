@@ -3,171 +3,281 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#111827">
-<title>PPL Workout Tracker</title>
+<meta name="theme-color" content="#0b0d10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PPL Tracker">
+<title>PPL Tracker</title>
 <style>
-:root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;color:#f3f4f6;background:#0b0d10}
-*{box-sizing:border-box}body{margin:0;background:#0b0d10;color:#f3f4f6}
-button,input{font:inherit}button{cursor:pointer}
-.app{max-width:520px;margin:auto;min-height:100vh;padding:18px 16px 36px}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
-h1{font-size:28px;margin:0;font-weight:800;letter-spacing:-.6px}.sub{color:#9ca3af;font-size:13px;margin-top:4px}
-.iconbtn{border:1px solid #272b32;background:#15181d;color:#fff;border-radius:12px;padding:10px 12px}
+:root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;color:#f4f4f5;background:#090a0c}
+*{box-sizing:border-box}body{margin:0;background:#090a0c;color:#f4f4f5}
+button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.app{max-width:560px;margin:auto;padding:16px 15px 38px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0 20px}
+h1{font-size:28px;line-height:1;margin:0;font-weight:850;letter-spacing:-.7px}
+h2{font-size:23px;line-height:1.1;margin:0;font-weight:850;letter-spacing:-.4px}
+.sub{color:#9a9da5;font-size:13px;margin-top:5px}
 .view{display:none}.view.active{display:block}
-.split{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.split button{border:0;border-radius:16px;padding:19px 8px;background:#171a20;color:#fff;font-weight:750;font-size:16px}
-.split button span{display:block;color:#9ca3af;font-size:12px;font-weight:500;margin-top:5px}
-.card{background:#15181d;border:1px solid #252a31;border-radius:18px;padding:15px;margin:12px 0}
-.exercise-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.exercise-name{font-weight:750;font-size:16px}.prev{font-size:12px;color:#9ca3af;margin-top:5px;line-height:1.4}
-.small{background:#20242b;color:#d1d5db;border:0;border-radius:9px;padding:7px 9px;font-size:12px}
-.set{display:grid;grid-template-columns:28px 1fr 1fr 40px;gap:8px;align-items:center;margin-top:9px}
-.setno{color:#6b7280;font-size:13px;text-align:center}
-input{width:100%;background:#0e1115;color:#fff;border:1px solid #30353d;border-radius:10px;padding:11px 9px;outline:none;min-width:0}
-input:focus{border-color:#9ca3af}
-.del{background:transparent;border:0;color:#777;font-size:20px}
-.addset,.addex{width:100%;background:#1c2026;border:1px dashed #3a4049;color:#d1d5db;border-radius:11px;padding:10px;margin-top:10px}
-.finish{width:100%;border:0;border-radius:14px;background:#f3f4f6;color:#111827;padding:15px;font-weight:800;margin:16px 0}
-.back{margin-bottom:14px}.titleRow{display:flex;justify-content:space-between;align-items:center}
-.history-item{background:#15181d;border:1px solid #252a31;border-radius:16px;padding:14px;margin:10px 0}
-.history-date{font-weight:750}.history-type{color:#9ca3af;font-size:12px;margin-top:3px}
-.history-line{font-size:13px;color:#d1d5db;margin-top:9px;line-height:1.5}
-.empty{color:#9ca3af;text-align:center;padding:30px 12px}
-.modal{position:fixed;inset:0;background:#0009;display:none;align-items:flex-end;justify-content:center;padding:12px}
-.modal.open{display:flex}.sheet{width:min(520px,100%);background:#171a20;border:1px solid #292e36;border-radius:20px;padding:18px}
-.sheet h2{margin:0 0 12px;font-size:20px}.sheet input{margin-bottom:10px}.sheet-actions{display:flex;gap:8px}.sheet-actions button{flex:1;padding:12px;border-radius:11px;border:0}
-.cancel{background:#252a31;color:#fff}.save{background:#f3f4f6;color:#111827;font-weight:750}
-.note{font-size:11px;color:#737984;margin-top:18px;text-align:center}
-@media(max-width:350px){.app{padding-left:11px;padding-right:11px}.set{grid-template-columns:23px 1fr 1fr 32px}}
+.card{background:#15171b;border:1px solid #262930;border-radius:18px;padding:15px;margin:11px 0}
+.split{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}
+.split button{border:0;border-radius:15px;padding:18px 6px;background:#1b1e24;color:#fff;font-weight:800;font-size:16px}
+.split button span{display:block;color:#9b9ea6;font-size:11px;font-weight:500;margin-top:5px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.actions>*{flex:1;min-width:120px}
+.btn{border:1px solid #30343c;background:#1b1e24;color:#fff;border-radius:11px;padding:11px 12px;font-weight:700}
+.btn.primary{background:#f1f1f1;color:#111;border-color:#f1f1f1}
+.btn.danger{color:#f0a0a0}.btn.small{padding:8px 10px;font-size:12px}
+.status{font-size:12px;color:#8f949d;margin:10px 2px 0;min-height:16px}
+.status.saved{color:#a9b4a7}.status.warn{color:#d4a36a}
+.workout-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.exercise{background:#15171b;border:1px solid #262930;border-radius:17px;padding:14px;margin:10px 0}
+.exercise-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.name{font-size:16px;font-weight:800}.previous{color:#999da6;font-size:12px;line-height:1.4;margin-top:4px}
+.prevStrong{color:#c9ccd2}
+.set-head,.set-row{display:grid;grid-template-columns:34px 1fr 1fr 40px;gap:7px;align-items:center}
+.set-head{color:#777b84;font-size:10px;text-transform:uppercase;letter-spacing:.5px;margin-top:13px}
+.set-row{margin-top:7px}.setnum{text-align:center;color:#70747c;font-size:12px}
+input{width:100%;min-width:0;background:#0d0f12;color:#fff;border:1px solid #30343b;border-radius:10px;padding:11px 9px;outline:0;font-size:16px}
+input:focus{border-color:#9aa0aa}
+.x{border:0;background:transparent;color:#747982;font-size:21px;padding:6px}
+.addset,.addex{width:100%;margin-top:9px;border:1px dashed #3a3e47;background:#1a1d22;color:#d8dae0;border-radius:11px;padding:10px;font-weight:700}
+.finish{width:100%;margin:14px 0 7px;border:0;border-radius:14px;background:#f1f1f1;color:#111;padding:15px;font-weight:850;font-size:15px}
+.back{margin-bottom:13px}
+.badge{display:inline-flex;align-items:center;gap:5px;background:#202329;border:1px solid #30343c;color:#cdd0d6;border-radius:999px;padding:5px 8px;font-size:11px}
+.empty{text-align:center;color:#858991;padding:34px 12px}
+.history-item{background:#15171b;border:1px solid #262930;border-radius:16px;padding:14px;margin:10px 0}
+.history-top{display:flex;justify-content:space-between;gap:10px}.history-date{font-weight:800}.history-meta{color:#92969f;font-size:12px;margin-top:3px}
+.history-line{font-size:13px;line-height:1.5;margin-top:9px;color:#d3d5da}
+.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:11px 0}.stat{background:#111317;border:1px solid #252830;border-radius:13px;padding:11px}.stat b{display:block;font-size:17px}.stat span{display:block;color:#858a93;font-size:10px;margin-top:3px}
+.modal{position:fixed;inset:0;background:#000b;display:none;align-items:flex-end;justify-content:center;padding:12px;z-index:10}.modal.open{display:flex}
+.sheet{width:min(560px,100%);background:#17191e;border:1px solid #2a2e36;border-radius:20px;padding:17px}
+.sheet h3{margin:0 0 12px;font-size:20px}.sheet input{margin-bottom:9px}.sheet-actions{display:flex;gap:8px}.sheet-actions button{flex:1}
+.importLabel{display:block;text-align:center}
+.hidden{display:none!important}
+@media(max-width:350px){.app{padding-left:10px;padding-right:10px}.set-head,.set-row{grid-template-columns:27px 1fr 1fr 34px}}
 </style>
 </head>
 <body>
 <main class="app">
-  <div class="top">
-    <div><h1>PPL Tracker</h1><div class="sub">Log it. Beat it. Repeat.</div></div>
-    <button class="iconbtn" id="historyBtn" type="button">History</button>
+<header class="top">
+  <div><h1>PPL Tracker</h1><div class="sub">Log it. Beat it. Repeat.</div></div>
+  <button class="btn small" id="historyBtn" type="button">History</button>
+</header>
+
+<section id="home" class="view active">
+  <div class="card">
+    <div class="name">Start workout</div>
+    <div class="sub">Choose your split</div>
+    <div class="split">
+      <button type="button" data-split="Push">PUSH<span>Chest · Shoulders · Triceps</span></button>
+      <button type="button" data-split="Pull">PULL<span>Back · Biceps · Rear delts</span></button>
+      <button type="button" data-split="Legs">LEGS<span>Quads · Hamstrings</span></button>
+    </div>
+    <div id="resumeBox" class="actions" style="margin-top:11px"></div>
   </div>
 
-  <section id="home" class="view active">
-    <div class="card">
-      <div class="exercise-name">Start today's workout</div>
-      <div class="sub" style="margin:6px 0 14px">Choose your split</div>
-      <div class="split">
-        <button type="button" data-split="Push">PUSH<span>Chest · Shoulders · Triceps</span></button>
-        <button type="button" data-split="Pull">PULL<span>Back · Biceps · Rear delts</span></button>
-        <button type="button" data-split="Legs">LEGS<span>Quads · Hamstrings</span></button>
-      </div>
+  <div class="card">
+    <div class="name">Progress</div>
+    <div class="statgrid">
+      <div class="stat"><b id="totalWorkouts">0</b><span>WORKOUTS</span></div>
+      <div class="stat"><b id="totalVolume">0</b><span>TOTAL KG</span></div>
+      <div class="stat"><b id="totalPRs">0</b><span>PRs</span></div>
     </div>
-    <div class="card">
-      <div class="exercise-name">Your tracker</div>
-      <div class="history-line">Your workout history stays on this device. You can export a backup from History.</div>
+    <div class="actions">
+      <button class="btn" id="backupBtn" type="button">Export Backup</button>
+      <label class="btn importLabel">Import Backup<input class="hidden" id="importInput" type="file" accept=".json,application/json"></label>
     </div>
-  </section>
+  </div>
+  <div class="status" id="homeStatus"></div>
+</section>
 
-  <section id="workout" class="view">
-    <button class="small back" id="backBtn" type="button">← Back</button>
-    <div class="titleRow"><div><h2 id="workoutTitle" style="margin:0">PUSH</h2><div class="sub">Previous session appears under each exercise</div></div></div>
-    <div id="exerciseList"></div>
-    <button class="addex" id="addExerciseBtn" type="button">＋ Add Exercise</button>
-    <button class="finish" id="finishBtn" type="button">FINISH WORKOUT</button>
-  </section>
+<section id="workout" class="view">
+  <button class="btn small back" id="backBtn" type="button">← Home</button>
+  <div class="workout-head">
+    <div><h2 id="workoutTitle">PUSH</h2><div class="sub" id="workoutSub">Autosaves after every change</div></div>
+    <span class="badge" id="elapsed">00:00</span>
+  </div>
+  <div id="exerciseList"></div>
+  <button class="addex" id="addExerciseBtn" type="button">＋ Add Exercise</button>
+  <button class="finish" id="finishBtn" type="button">FINISH WORKOUT</button>
+  <div class="status saved" id="saveStatus">● Autosaved</div>
+</section>
 
-  <section id="history" class="view">
-    <button class="small back" id="historyBack" type="button">← Back</button>
-    <div class="titleRow"><div><h2 style="margin:0">History</h2><div class="sub">Every finished workout</div></div><button class="small" id="exportBtn" type="button">Export</button></div>
-    <div id="historyList"></div>
-    <button class="small" id="clearBtn" type="button" style="width:100%;margin-top:8px">Clear all history</button>
-  </section>
-</main>
+<section id="history" class="view">
+  <button class="btn small back" id="historyBack" type="button">← Home</button>
+  <div class="workout-head"><div><h2>History</h2><div class="sub">Completed workouts and progression</div></div></div>
+  <div id="historyList"></div>
+  <div class="actions" style="margin-top:10px"><button class="btn" id="historyExport" type="button">Export Backup</button><button class="btn danger" id="clearBtn" type="button">Clear History</button></div>
+</section>
 
 <div class="modal" id="modal">
   <div class="sheet">
-    <h2 id="modalTitle">Add exercise</h2>
-    <input id="exerciseInput" type="text" maxlength="60" placeholder="e.g. Calf Raise">
-    <div class="sheet-actions">
-      <button class="cancel" id="cancelModal" type="button">Cancel</button>
-      <button class="save" id="saveExercise" type="button">Add</button>
-    </div>
+    <h3 id="modalTitle">Add exercise</h3>
+    <input id="exerciseInput" maxlength="60" placeholder="Exercise name" autocomplete="off">
+    <div class="sheet-actions"><button class="btn" id="cancelModal" type="button">Cancel</button><button class="btn primary" id="saveExercise" type="button">Add</button></div>
   </div>
 </div>
 
 <script>
 (() => {
-  const key="ppl_tracker_v1";
+  const KEY="ppl_tracker_v2";
+  const oldKey="ppl_tracker_v1";
   const defaults={
     Push:["Incline Smith Chest Press","Lying Smith Chest Press","Seated Chest Press","Plate Shoulder Press","Dumbbell Lateral Raise","Triceps Pushdown — Bar","Second Triceps"],
     Pull:["Lat Pulldown","Seated Row","Cable High Row","Bicep Curl","Hammer Curl","Rear Delts / Face Pull"],
     Legs:["Leg Press","Leg Curl","Leg Extension"]
   };
-  let db=JSON.parse(localStorage.getItem(key)||'{"history":[],"custom":{}}');
-  let split="", working=[];
+  function fresh(){return {history:[],custom:{},draft:null,prs:{}}}
+  let db;
+  try{db=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){db=null}
+  if(!db){
+    try{
+      const old=JSON.parse(localStorage.getItem(oldKey)||"null");
+      db=old?{history:old.history||[],custom:old.custom||{},draft:null,prs:{}}:fresh();
+    }catch(e){db=fresh()}
+  }
+  db.history=db.history||[];db.custom=db.custom||{};db.prs=db.prs||{};
+  let split="",working=[],startedAt=null,timer=null;
+
   const $=id=>document.getElementById(id);
-  function save(){localStorage.setItem(key,JSON.stringify(db))}
+  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(db));return true}catch(e){return false}};
   function show(id){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));$(id).classList.add("active");window.scrollTo(0,0)}
+  function namesFor(s){return [...(defaults[s]||[]),...(db.custom[s]||[])].filter((x,i,a)=>a.indexOf(x)===i)}
   function lastFor(name){
-    for(const w of db.history){const e=w.exercises.find(x=>x.name===name);if(e && e.sets.length)return e.sets}
-    return null
+    for(const w of db.history){
+      const e=w.exercises.find(x=>x.name===name);
+      if(e&&e.sets?.length)return e.sets;
+    }
+    return null;
   }
   function fmtSets(sets){return sets.map(s=>`${s.kg} kg × ${s.reps}`).join(", ")}
+  function volumeOf(exercises){return exercises.reduce((a,e)=>a+e.sets.reduce((x,s)=>x+(Number(s.kg)||0)*(Number(s.reps)||0),0),0)}
+  function elapsedText(){
+    const sec=Math.max(0,Math.floor((Date.now()-startedAt)/1000)),m=Math.floor(sec/60),s=sec%60;
+    return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  }
+  function updateTimer(){if(startedAt)$("elapsed").textContent=elapsedText()}
+  function startTimer(){clearInterval(timer);timer=setInterval(updateTimer,1000);updateTimer()}
+  function saveDraft(){
+    if(!split)return;
+    db.draft={split,startedAt,exercises:working};
+    persist();
+    $("saveStatus").textContent="● Autosaved";
+  }
+  function loadDraft(){
+    if(!db.draft)return;
+    split=db.draft.split;startedAt=db.draft.startedAt;working=db.draft.exercises||[];
+    $("workoutTitle").textContent=split.toUpperCase();render();startTimer();show("workout");
+  }
   function start(s){
-    split=s; const names=[...(defaults[s]||[]),...((db.custom[s])||[])];
-    working=names.map(n=>({name:n,sets:[{kg:"",reps:""}]}));
-    $("workoutTitle").textContent=s.toUpperCase(); render(); show("workout");
+    split=s;startedAt=Date.now();
+    working=namesFor(s).map(n=>({name:n,sets:[{kg:"",reps:""}]}));
+    saveDraft();$("workoutTitle").textContent=s.toUpperCase();render();startTimer();show("workout");
   }
   function render(){
-    $("exerciseList").innerHTML="";
+    const root=$("exerciseList");root.innerHTML="";
     working.forEach((ex,i)=>{
-      const card=document.createElement("div");card.className="card";
+      const card=document.createElement("div");card.className="exercise";
       const prev=lastFor(ex.name);
-      card.innerHTML=`<div class="exercise-head"><div><div class="exercise-name">${esc(ex.name)}</div><div class="prev">${prev?"Last: "+esc(fmtSets(prev)):"No previous log"}</div></div><button class="small remove" type="button" data-i="${i}">Remove</button></div><div class="sets"></div><button class="addset" type="button" data-add="${i}">＋ Add Set</button>`;
+      card.innerHTML=`<div class="exercise-top"><div><div class="name">${esc(ex.name)}</div><div class="previous">${prev?"Last: <span class='prevStrong'>"+esc(fmtSets(prev))+"</span>":"No previous log"}</div></div><button class="btn small remove" type="button" data-i="${i}">Remove</button></div><div class="set-head"><div>Set</div><div>Weight</div><div>Reps</div><div></div></div><div class="sets"></div><button class="addset" type="button" data-add="${i}">＋ Add Set</button>`;
       const sets=card.querySelector(".sets");
       ex.sets.forEach((s,j)=>{
-        const row=document.createElement("div");row.className="set";
-        row.innerHTML=`<div class="setno">${j+1}</div><input inputmode="decimal" placeholder="kg" value="${esc(s.kg)}" data-i="${i}" data-j="${j}" data-f="kg"><input inputmode="numeric" placeholder="reps" value="${esc(s.reps)}" data-i="${i}" data-j="${j}" data-f="reps"><button class="del" type="button" data-del="${i},${j}" aria-label="Delete set">×</button>`;
+        const row=document.createElement("div");row.className="set-row";
+        row.innerHTML=`<div class="setnum">${j+1}</div><input inputmode="decimal" placeholder="kg" value="${esc(s.kg)}" data-i="${i}" data-j="${j}" data-f="kg"><input inputmode="numeric" placeholder="reps" value="${esc(s.reps)}" data-i="${i}" data-j="${j}" data-f="reps"><button class="x" type="button" data-del="${i},${j}" aria-label="Delete set">×</button>`;
         sets.appendChild(row);
       });
-      $("exerciseList").appendChild(card);
+      root.appendChild(card);
     });
-    $("exerciseList").querySelectorAll("input").forEach(inp=>inp.addEventListener("input",e=>{const i=+e.target.dataset.i,j=+e.target.dataset.j,f=e.target.dataset.f;working[i].sets[j][f]=e.target.value}));
-    $("exerciseList").querySelectorAll("[data-add]").forEach(b=>b.addEventListener("click",()=>{working[+b.dataset.add].sets.push({kg:"",reps:""});render()}));
-    $("exerciseList").querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{const [i,j]=b.dataset.del.split(",").map(Number);if(working[i].sets.length>1)working[i].sets.splice(j,1);render()}));
-    $("exerciseList").querySelectorAll(".remove").forEach(b=>b.addEventListener("click",()=>{working.splice(+b.dataset.i,1);render()}));
+    root.querySelectorAll("input").forEach(inp=>inp.addEventListener("input",e=>{
+      const i=+e.target.dataset.i,j=+e.target.dataset.j,f=e.target.dataset.f;
+      working[i].sets[j][f]=e.target.value;saveDraft();
+    }));
+    root.querySelectorAll("[data-add]").forEach(b=>b.addEventListener("click",()=>{
+      working[+b.dataset.add].sets.push({kg:"",reps:""});saveDraft();render();
+    }));
+    root.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{
+      const [i,j]=b.dataset.del.split(",").map(Number);
+      if(working[i].sets.length>1)working[i].sets.splice(j,1);saveDraft();render();
+    }));
+    root.querySelectorAll(".remove").forEach(b=>b.addEventListener("click",()=>{
+      working.splice(+b.dataset.i,1);saveDraft();render();
+    }));
   }
   function finish(){
     const cleaned=working.map(e=>({name:e.name,sets:e.sets.filter(s=>Number(s.kg)>0&&Number(s.reps)>0).map(s=>({kg:Number(s.kg),reps:Number(s.reps)}))})).filter(e=>e.sets.length);
     if(!cleaned.length){alert("Enter at least one weight and rep count before finishing.");return}
-    db.history.unshift({id:Date.now(),date:new Date().toISOString(),split,exercises:cleaned});
-    save(); alert("Workout saved ✓"); show("home");
+    const volume=volumeOf(cleaned), duration=Math.max(0,Math.floor((Date.now()-startedAt)/1000));
+    let newPRs=0;
+    cleaned.forEach(e=>e.sets.forEach(s=>{
+      const oneRepMax=s.kg*(1+s.reps/30), old=db.prs[e.name]||0;
+      if(oneRepMax>old){db.prs[e.name]=oneRepMax;newPRs++}
+    }));
+    db.history.unshift({id:Date.now(),date:new Date().toISOString(),split,exercises:cleaned,volume,duration,newPRs});
+    db.draft=null;persist();clearInterval(timer);timer=null;
+    alert(`Workout saved ✓${newPRs?"\\nNew PRs: "+newPRs:""}`);
+    updateHome();show("home");
   }
   function renderHistory(){
     const el=$("historyList");el.innerHTML="";
-    if(!db.history.length){el.innerHTML='<div class="empty">No workouts logged yet.</div>';return}
+    if(!db.history.length){el.innerHTML='<div class="empty">No completed workouts yet.</div>';return}
     db.history.forEach(w=>{
-      const d=new Date(w.date), item=document.createElement("div");item.className="history-item";
-      item.innerHTML=`<div class="history-date">${d.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"})}</div><div class="history-type">${esc(w.split)} · ${d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})}</div>${w.exercises.map(e=>`<div class="history-line"><b>${esc(e.name)}</b><br>${esc(fmtSets(e.sets))}</div>`).join("")}`;
+      const d=new Date(w.date), mins=Math.floor((w.duration||0)/60), secs=(w.duration||0)%60;
+      const item=document.createElement("div");item.className="history-item";
+      item.innerHTML=`<div class="history-top"><div><div class="history-date">${d.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"})}</div><div class="history-meta">${esc(w.split)} · ${mins}m ${secs}s</div></div><button class="btn small danger deleteHistory" data-id="${w.id}" type="button">Delete</button></div><div class="statgrid"><div class="stat"><b>${Math.round(w.volume||volumeOf(w.exercises))}</b><span>KG VOLUME</span></div><div class="stat"><b>${w.exercises.length}</b><span>EXERCISES</span></div><div class="stat"><b>${w.newPRs||0}</b><span>NEW PRs</span></div></div>${w.exercises.map(e=>`<div class="history-line"><b>${esc(e.name)}</b><br>${esc(fmtSets(e.sets))}</div>`).join("")}`;
       el.appendChild(item);
     });
+    el.querySelectorAll(".deleteHistory").forEach(b=>b.addEventListener("click",()=>{
+      db.history=db.history.filter(x=>String(x.id)!==String(b.dataset.id));persist();renderHistory();updateHome();
+    }));
+  }
+  function updateHome(){
+    $("totalWorkouts").textContent=db.history.length;
+    $("totalVolume").textContent=Math.round(db.history.reduce((a,w)=>a+(w.volume||volumeOf(w.exercises)),0)).toLocaleString();
+    $("totalPRs").textContent=db.history.reduce((a,w)=>a+(w.newPRs||0),0);
+    const box=$("resumeBox");box.innerHTML="";
+    if(db.draft){
+      const b=document.createElement("button");b.className="btn primary";b.type="button";b.textContent=`Resume ${db.draft.split} workout`;b.addEventListener("click",loadDraft);box.appendChild(b);
+      const c=document.createElement("button");c.className="btn";c.type="button";c.textContent="Discard draft";c.addEventListener("click",()=>{if(confirm("Discard the unfinished workout?")){db.draft=null;persist();updateHome()}});box.appendChild(c);
+    }
   }
   function exportData(){
     const blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");
-    a.href=url;a.download="ppl-workout-backup.json";a.click();URL.revokeObjectURL(url);
+    a.href=url;a.download="ppl-tracker-backup.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    $("homeStatus").textContent="Backup exported ✓";
   }
-  function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-  document.querySelectorAll("[data-split]").forEach(b=>b.addEventListener("click",()=>start(b.dataset.split)));
-  $("backBtn").addEventListener("click",()=>show("home"));
-  $("finishBtn").addEventListener("click",finish);
+  function importData(file){
+    const reader=new FileReader();
+    reader.onload=()=>{
+      try{
+        const incoming=JSON.parse(reader.result);
+        if(!incoming||!Array.isArray(incoming.history))throw new Error();
+        if(confirm("Replace your current tracker data with this backup?")){db={...fresh(),...incoming};persist();updateHome();alert("Backup restored ✓")}
+      }catch(e){alert("That file is not a valid PPL Tracker backup.")}
+    };
+    reader.readAsText(file);
+  }
   $("historyBtn").addEventListener("click",()=>{renderHistory();show("history")});
-  $("historyBack").addEventListener("click",()=>show("home"));
-  $("exportBtn").addEventListener("click",exportData);
-  $("clearBtn").addEventListener("click",()=>{if(confirm("Delete every saved workout? This cannot be undone.")){db.history=[];save();renderHistory()}});
+  $("historyBack").addEventListener("click",()=>{updateHome();show("home")});
+  $("backBtn").addEventListener("click",()=>{
+    if(db.draft&&split){saveDraft();updateHome();show("home")}else show("home")
+  });
+  $("finishBtn").addEventListener("click",finish);
+  $("backupBtn").addEventListener("click",exportData);
+  $("historyExport").addEventListener("click",exportData);
+  $("importInput").addEventListener("change",e=>{if(e.target.files[0])importData(e.target.files[0]);e.target.value=""});
+  $("clearBtn").addEventListener("click",()=>{if(confirm("Delete all completed workout history? Your current unfinished workout will remain.")){db.history=[];persist();renderHistory();updateHome()}});
+  document.querySelectorAll("[data-split]").forEach(b=>b.addEventListener("click",()=>start(b.dataset.split)));
   $("addExerciseBtn").addEventListener("click",()=>{$("exerciseInput").value="";$("modal").classList.add("open");$("exerciseInput").focus()});
   $("cancelModal").addEventListener("click",()=>$("modal").classList.remove("open"));
   $("saveExercise").addEventListener("click",()=>{
     const n=$("exerciseInput").value.trim();if(!n)return;
     if(!db.custom[split])db.custom[split]=[];
-    if(!db.custom[split].includes(n)){db.custom[split].push(n);save()}
-    working.push({name:n,sets:[{kg:"",reps:""}]});$("modal").classList.remove("open");render();
+    if(!db.custom[split].includes(n))db.custom[split].push(n);
+    working.push({name:n,sets:[{kg:"",reps:""}]});saveDraft();$("modal").classList.remove("open");render();
   });
+  $("exerciseInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("saveExercise").click()});
+  window.addEventListener("beforeunload",saveDraft);
+  updateHome();
 })();
 </script>
 </body>
