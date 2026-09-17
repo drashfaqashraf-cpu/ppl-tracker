@@ -43,6 +43,13 @@ input:focus{border-color:#9aa0aa}
 .finish{width:100%;margin:14px 0 7px;border:0;border-radius:14px;background:#f1f1f1;color:#111;padding:15px;font-weight:850;font-size:15px}
 .back{margin-bottom:13px}
 .badge{display:inline-flex;align-items:center;gap:5px;background:#202329;border:1px solid #30343c;color:#cdd0d6;border-radius:999px;padding:5px 8px;font-size:11px}
+.rest-panel{background:#111317;border:1px solid #2a2e36;border-radius:14px;padding:12px;margin-top:10px}
+.rest-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.rest-time{font-size:28px;font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.rest-label{font-size:11px;color:#8c919a;text-transform:uppercase;letter-spacing:.6px}
+.rest-actions{display:flex;gap:6px;margin-top:9px}.rest-actions button{flex:1;padding:9px 6px}
+.notes{margin-top:10px}.notes textarea{width:100%;min-height:58px;resize:vertical;background:#0d0f12;color:#fff;border:1px solid #30343b;border-radius:10px;padding:10px;font:inherit;font-size:14px;outline:0}.notes textarea:focus{border-color:#9aa0aa}
+
 .empty{text-align:center;color:#858991;padding:34px 12px}
 .history-item{background:#15171b;border:1px solid #262930;border-radius:16px;padding:14px;margin:10px 0}
 .history-top{display:flex;justify-content:space-between;gap:10px}.history-date{font-weight:800}.history-meta{color:#92969f;font-size:12px;margin-top:3px}
@@ -96,6 +103,18 @@ input:focus{border-color:#9aa0aa}
     <div><h2 id="workoutTitle">PUSH</h2><div class="sub" id="workoutSub">Autosaves after every change</div></div>
     <span class="badge" id="elapsed">00:00</span>
   </div>
+  <div id="restPanel" class="rest-panel">
+    <div class="rest-top">
+      <div><div class="rest-label">Rest timer</div><div class="rest-time" id="restTime">02:00</div></div>
+      
+    </div>
+    <div class="rest-actions">
+      <button class="btn small" type="button" data-rest="60">60s</button>
+      <button class="btn small" type="button" data-rest="90">90s</button>
+      <button class="btn small" type="button" data-rest="120">120s</button>
+      <button class="btn small" type="button" data-rest="180">180s</button>
+    </div>
+  </div>
   <div id="exerciseList"></div>
   <button class="addex" id="addExerciseBtn" type="button">＋ Add Exercise</button>
   <button class="finish" id="finishBtn" type="button">FINISH WORKOUT</button>
@@ -137,8 +156,24 @@ input:focus{border-color:#9aa0aa}
   }
   db.history=db.history||[];db.custom=db.custom||{};db.prs=db.prs||{};
   let split="",working=[],startedAt=null,timer=null;
+  let restRemaining=120,restTimer=null;
 
   const $=id=>document.getElementById(id);
+  function formatRest(sec){return `${String(Math.floor(sec/60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`}
+  function renderRest(){$("restTime").textContent=formatRest(restRemaining)}
+  function setRest(sec){clearInterval(restTimer);restTimer=null;restRemaining=sec;renderRest()}
+  function startRest(){
+    clearInterval(restTimer);
+    if(restRemaining<=0)restRemaining=120;
+    restTimer=setInterval(()=>{
+      restRemaining--;renderRest();
+      if(restRemaining<=0){
+        clearInterval(restTimer);restTimer=null;
+        if(navigator.vibrate)navigator.vibrate([180,80,180]);
+        alert("Rest complete — next set.");
+      }
+    },1000);
+  }
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(db));return true}catch(e){return false}};
   function show(id){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));$(id).classList.add("active");window.scrollTo(0,0)}
@@ -167,19 +202,20 @@ input:focus{border-color:#9aa0aa}
   function loadDraft(){
     if(!db.draft)return;
     split=db.draft.split;startedAt=db.draft.startedAt;working=db.draft.exercises||[];
-    $("workoutTitle").textContent=split.toUpperCase();render();startTimer();show("workout");
+    $("workoutTitle").textContent=split.toUpperCase();setRest(120);render();startTimer();show("workout");
   }
   function start(s){
     split=s;startedAt=Date.now();
     working=namesFor(s).map(n=>({name:n,sets:[{kg:"",reps:""}]}));
-    saveDraft();$("workoutTitle").textContent=s.toUpperCase();render();startTimer();show("workout");
+    saveDraft();$("workoutTitle").textContent=s.toUpperCase();setRest(120);render();startTimer();show("workout");
   }
   function render(){
     const root=$("exerciseList");root.innerHTML="";
     working.forEach((ex,i)=>{
       const card=document.createElement("div");card.className="exercise";
       const prev=lastFor(ex.name);
-      card.innerHTML=`<div class="exercise-top"><div><div class="name">${esc(ex.name)}</div><div class="previous">${prev?"Last: <span class='prevStrong'>"+esc(fmtSets(prev))+"</span>":"No previous log"}</div></div><button class="btn small remove" type="button" data-i="${i}">Remove</button></div><div class="set-head"><div>Set</div><div>Weight</div><div>Reps</div><div></div></div><div class="sets"></div><button class="addset" type="button" data-add="${i}">＋ Add Set</button>`;
+      card.innerHTML=`<div class="exercise-top"><div><div class="name">${esc(ex.name)}</div><div class="previous">${prev?"Last: <span class='prevStrong'>"+esc(fmtSets(prev))+"</span>":"No previous log"}</div></div><button class="btn small remove" type="button" data-i="${i}">Remove</button></div><div class="set-head"><div>Set</div><div>Weight</div><div>Reps</div><div></div></div><div class="sets"></div><button class="addset" type="button" data-add="${i}">＋ Add Set</button>
+        <div class="notes"><textarea placeholder="Notes for this exercise…" data-note="${i}">${esc(ex.notes||"")}</textarea></div>`;
       const sets=card.querySelector(".sets");
       ex.sets.forEach((s,j)=>{
         const row=document.createElement("div");row.className="set-row";
@@ -192,8 +228,20 @@ input:focus{border-color:#9aa0aa}
       const i=+e.target.dataset.i,j=+e.target.dataset.j,f=e.target.dataset.f;
       working[i].sets[j][f]=e.target.value;saveDraft();
     }));
+    root.querySelectorAll("[data-note]").forEach(t=>t.addEventListener("input",e=>{
+      working[+e.target.dataset.note].notes=e.target.value;saveDraft();
+    }));
     root.querySelectorAll("[data-add]").forEach(b=>b.addEventListener("click",()=>{
-      working[+b.dataset.add].sets.push({kg:"",reps:""});saveDraft();render();
+      const i=+b.dataset.add;
+      const sets=working[i].sets;
+      const previous=sets[sets.length-1]||{kg:"",reps:""};
+      // Carry the previous set's weight into the new set; leave reps blank.
+      sets.push({kg:previous.kg||"",reps:""});
+      saveDraft();render();
+      // Put focus on the new reps field for fast gym logging.
+      const rows=root.querySelectorAll(".exercise")[i]?.querySelectorAll(".set-row");
+      const last=rows?.[rows.length-1];
+      last?.querySelector('input[data-f="reps"]')?.focus();
     }));
     root.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{
       const [i,j]=b.dataset.del.split(",").map(Number);
@@ -204,7 +252,7 @@ input:focus{border-color:#9aa0aa}
     }));
   }
   function finish(){
-    const cleaned=working.map(e=>({name:e.name,sets:e.sets.filter(s=>Number(s.kg)>0&&Number(s.reps)>0).map(s=>({kg:Number(s.kg),reps:Number(s.reps)}))})).filter(e=>e.sets.length);
+    const cleaned=working.map(e=>({name:e.name,notes:e.notes||"",sets:e.sets.filter(s=>Number(s.kg)>0&&Number(s.reps)>0).map(s=>({kg:Number(s.kg),reps:Number(s.reps)}))})).filter(e=>e.sets.length);
     if(!cleaned.length){alert("Enter at least one weight and rep count before finishing.");return}
     const volume=volumeOf(cleaned), duration=Math.max(0,Math.floor((Date.now()-startedAt)/1000));
     let newPRs=0;
@@ -213,7 +261,7 @@ input:focus{border-color:#9aa0aa}
       if(oneRepMax>old){db.prs[e.name]=oneRepMax;newPRs++}
     }));
     db.history.unshift({id:Date.now(),date:new Date().toISOString(),split,exercises:cleaned,volume,duration,newPRs});
-    db.draft=null;persist();clearInterval(timer);timer=null;
+    db.draft=null;persist();clearInterval(timer);timer=null;clearInterval(restTimer);restTimer=null;
     alert(`Workout saved ✓${newPRs?"\\nNew PRs: "+newPRs:""}`);
     updateHome();show("home");
   }
@@ -223,7 +271,7 @@ input:focus{border-color:#9aa0aa}
     db.history.forEach(w=>{
       const d=new Date(w.date), mins=Math.floor((w.duration||0)/60), secs=(w.duration||0)%60;
       const item=document.createElement("div");item.className="history-item";
-      item.innerHTML=`<div class="history-top"><div><div class="history-date">${d.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"})}</div><div class="history-meta">${esc(w.split)} · ${mins}m ${secs}s</div></div><button class="btn small danger deleteHistory" data-id="${w.id}" type="button">Delete</button></div><div class="statgrid"><div class="stat"><b>${Math.round(w.volume||volumeOf(w.exercises))}</b><span>KG VOLUME</span></div><div class="stat"><b>${w.exercises.length}</b><span>EXERCISES</span></div><div class="stat"><b>${w.newPRs||0}</b><span>NEW PRs</span></div></div>${w.exercises.map(e=>`<div class="history-line"><b>${esc(e.name)}</b><br>${esc(fmtSets(e.sets))}</div>`).join("")}`;
+      item.innerHTML=`<div class="history-top"><div><div class="history-date">${d.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"})}</div><div class="history-meta">${esc(w.split)} · ${mins}m ${secs}s</div></div><button class="btn small danger deleteHistory" data-id="${w.id}" type="button">Delete</button></div><div class="statgrid"><div class="stat"><b>${Math.round(w.volume||volumeOf(w.exercises))}</b><span>KG VOLUME</span></div><div class="stat"><b>${w.exercises.length}</b><span>EXERCISES</span></div><div class="stat"><b>${w.newPRs||0}</b><span>NEW PRs</span></div></div>${w.exercises.map(e=>`<div class="history-line"><b>${esc(e.name)}</b><br>${esc(fmtSets(e.sets))}${e.notes?`<br><span style="color:#8f949d">📝 ${esc(e.notes)}</span>`:""}</div>`).join("")}`;
       el.appendChild(item);
     });
     el.querySelectorAll(".deleteHistory").forEach(b=>b.addEventListener("click",()=>{
@@ -267,13 +315,17 @@ input:focus{border-color:#9aa0aa}
   $("importInput").addEventListener("change",e=>{if(e.target.files[0])importData(e.target.files[0]);e.target.value=""});
   $("clearBtn").addEventListener("click",()=>{if(confirm("Delete all completed workout history? Your current unfinished workout will remain.")){db.history=[];persist();renderHistory();updateHome()}});
   document.querySelectorAll("[data-split]").forEach(b=>b.addEventListener("click",()=>start(b.dataset.split)));
+  document.querySelectorAll("[data-rest]").forEach(b=>b.addEventListener("click",()=>{
+    setRest(+b.dataset.rest);
+    startRest();
+  }));
   $("addExerciseBtn").addEventListener("click",()=>{$("exerciseInput").value="";$("modal").classList.add("open");$("exerciseInput").focus()});
   $("cancelModal").addEventListener("click",()=>$("modal").classList.remove("open"));
   $("saveExercise").addEventListener("click",()=>{
     const n=$("exerciseInput").value.trim();if(!n)return;
     if(!db.custom[split])db.custom[split]=[];
     if(!db.custom[split].includes(n))db.custom[split].push(n);
-    working.push({name:n,sets:[{kg:"",reps:""}]});saveDraft();$("modal").classList.remove("open");render();
+    working.push({name:n,sets:[{kg:"",reps:""}],notes:""});saveDraft();$("modal").classList.remove("open");render();
   });
   $("exerciseInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("saveExercise").click()});
   window.addEventListener("beforeunload",saveDraft);
