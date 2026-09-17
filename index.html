@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>PPL Workout Tracker</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;color:#f3f4f6;background:#0b0d10}
+*{box-sizing:border-box}body{margin:0;background:#0b0d10;color:#f3f4f6}
+button,input{font:inherit}button{cursor:pointer}
+.app{max-width:520px;margin:auto;min-height:100vh;padding:18px 16px 36px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+h1{font-size:28px;margin:0;font-weight:800;letter-spacing:-.6px}.sub{color:#9ca3af;font-size:13px;margin-top:4px}
+.iconbtn{border:1px solid #272b32;background:#15181d;color:#fff;border-radius:12px;padding:10px 12px}
+.view{display:none}.view.active{display:block}
+.split{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.split button{border:0;border-radius:16px;padding:19px 8px;background:#171a20;color:#fff;font-weight:750;font-size:16px}
+.split button span{display:block;color:#9ca3af;font-size:12px;font-weight:500;margin-top:5px}
+.card{background:#15181d;border:1px solid #252a31;border-radius:18px;padding:15px;margin:12px 0}
+.exercise-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.exercise-name{font-weight:750;font-size:16px}.prev{font-size:12px;color:#9ca3af;margin-top:5px;line-height:1.4}
+.small{background:#20242b;color:#d1d5db;border:0;border-radius:9px;padding:7px 9px;font-size:12px}
+.set{display:grid;grid-template-columns:28px 1fr 1fr 40px;gap:8px;align-items:center;margin-top:9px}
+.setno{color:#6b7280;font-size:13px;text-align:center}
+input{width:100%;background:#0e1115;color:#fff;border:1px solid #30353d;border-radius:10px;padding:11px 9px;outline:none;min-width:0}
+input:focus{border-color:#9ca3af}
+.del{background:transparent;border:0;color:#777;font-size:20px}
+.addset,.addex{width:100%;background:#1c2026;border:1px dashed #3a4049;color:#d1d5db;border-radius:11px;padding:10px;margin-top:10px}
+.finish{width:100%;border:0;border-radius:14px;background:#f3f4f6;color:#111827;padding:15px;font-weight:800;margin:16px 0}
+.back{margin-bottom:14px}.titleRow{display:flex;justify-content:space-between;align-items:center}
+.history-item{background:#15181d;border:1px solid #252a31;border-radius:16px;padding:14px;margin:10px 0}
+.history-date{font-weight:750}.history-type{color:#9ca3af;font-size:12px;margin-top:3px}
+.history-line{font-size:13px;color:#d1d5db;margin-top:9px;line-height:1.5}
+.empty{color:#9ca3af;text-align:center;padding:30px 12px}
+.modal{position:fixed;inset:0;background:#0009;display:none;align-items:flex-end;justify-content:center;padding:12px}
+.modal.open{display:flex}.sheet{width:min(520px,100%);background:#171a20;border:1px solid #292e36;border-radius:20px;padding:18px}
+.sheet h2{margin:0 0 12px;font-size:20px}.sheet input{margin-bottom:10px}.sheet-actions{display:flex;gap:8px}.sheet-actions button{flex:1;padding:12px;border-radius:11px;border:0}
+.cancel{background:#252a31;color:#fff}.save{background:#f3f4f6;color:#111827;font-weight:750}
+.note{font-size:11px;color:#737984;margin-top:18px;text-align:center}
+@media(max-width:350px){.app{padding-left:11px;padding-right:11px}.set{grid-template-columns:23px 1fr 1fr 32px}}
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="top">
+    <div><h1>PPL Tracker</h1><div class="sub">Log it. Beat it. Repeat.</div></div>
+    <button class="iconbtn" id="historyBtn" type="button">History</button>
+  </div>
+
+  <section id="home" class="view active">
+    <div class="card">
+      <div class="exercise-name">Start today's workout</div>
+      <div class="sub" style="margin:6px 0 14px">Choose your split</div>
+      <div class="split">
+        <button type="button" data-split="Push">PUSH<span>Chest · Shoulders · Triceps</span></button>
+        <button type="button" data-split="Pull">PULL<span>Back · Biceps · Rear delts</span></button>
+        <button type="button" data-split="Legs">LEGS<span>Quads · Hamstrings</span></button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="exercise-name">Your tracker</div>
+      <div class="history-line">Your workout history stays on this device. You can export a backup from History.</div>
+    </div>
+  </section>
+
+  <section id="workout" class="view">
+    <button class="small back" id="backBtn" type="button">← Back</button>
+    <div class="titleRow"><div><h2 id="workoutTitle" style="margin:0">PUSH</h2><div class="sub">Previous session appears under each exercise</div></div></div>
+    <div id="exerciseList"></div>
+    <button class="addex" id="addExerciseBtn" type="button">＋ Add Exercise</button>
+    <button class="finish" id="finishBtn" type="button">FINISH WORKOUT</button>
+  </section>
+
+  <section id="history" class="view">
+    <button class="small back" id="historyBack" type="button">← Back</button>
+    <div class="titleRow"><div><h2 style="margin:0">History</h2><div class="sub">Every finished workout</div></div><button class="small" id="exportBtn" type="button">Export</button></div>
+    <div id="historyList"></div>
+    <button class="small" id="clearBtn" type="button" style="width:100%;margin-top:8px">Clear all history</button>
+  </section>
+</main>
+
+<div class="modal" id="modal">
+  <div class="sheet">
+    <h2 id="modalTitle">Add exercise</h2>
+    <input id="exerciseInput" type="text" maxlength="60" placeholder="e.g. Calf Raise">
+    <div class="sheet-actions">
+      <button class="cancel" id="cancelModal" type="button">Cancel</button>
+      <button class="save" id="saveExercise" type="button">Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const key="ppl_tracker_v1";
+  const defaults={
+    Push:["Incline Smith Chest Press","Lying Smith Chest Press","Seated Chest Press","Plate Shoulder Press","Dumbbell Lateral Raise","Triceps Pushdown — Bar","Second Triceps"],
+    Pull:["Lat Pulldown","Seated Row","Cable High Row","Bicep Curl","Hammer Curl","Rear Delts / Face Pull"],
+    Legs:["Leg Press","Leg Curl","Leg Extension"]
+  };
+  let db=JSON.parse(localStorage.getItem(key)||'{"history":[],"custom":{}}');
+  let split="", working=[];
+  const $=id=>document.getElementById(id);
+  function save(){localStorage.setItem(key,JSON.stringify(db))}
+  function show(id){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));$(id).classList.add("active");window.scrollTo(0,0)}
+  function lastFor(name){
+    for(const w of db.history){const e=w.exercises.find(x=>x.name===name);if(e && e.sets.length)return e.sets}
+    return null
+  }
+  function fmtSets(sets){return sets.map(s=>`${s.kg} kg × ${s.reps}`).join(", ")}
+  function start(s){
+    split=s; const names=[...(defaults[s]||[]),...((db.custom[s])||[])];
+    working=names.map(n=>({name:n,sets:[{kg:"",reps:""}]}));
+    $("workoutTitle").textContent=s.toUpperCase(); render(); show("workout");
+  }
+  function render(){
+    $("exerciseList").innerHTML="";
+    working.forEach((ex,i)=>{
+      const card=document.createElement("div");card.className="card";
+      const prev=lastFor(ex.name);
+      card.innerHTML=`<div class="exercise-head"><div><div class="exercise-name">${esc(ex.name)}</div><div class="prev">${prev?"Last: "+esc(fmtSets(prev)):"No previous log"}</div></div><button class="small remove" type="button" data-i="${i}">Remove</button></div><div class="sets"></div><button class="addset" type="button" data-add="${i}">＋ Add Set</button>`;
+      const sets=card.querySelector(".sets");
+      ex.sets.forEach((s,j)=>{
+        const row=document.createElement("div");row.className="set";
+        row.innerHTML=`<div class="setno">${j+1}</div><input inputmode="decimal" placeholder="kg" value="${esc(s.kg)}" data-i="${i}" data-j="${j}" data-f="kg"><input inputmode="numeric" placeholder="reps" value="${esc(s.reps)}" data-i="${i}" data-j="${j}" data-f="reps"><button class="del" type="button" data-del="${i},${j}" aria-label="Delete set">×</button>`;
+        sets.appendChild(row);
+      });
+      $("exerciseList").appendChild(card);
+    });
+    $("exerciseList").querySelectorAll("input").forEach(inp=>inp.addEventListener("input",e=>{const i=+e.target.dataset.i,j=+e.target.dataset.j,f=e.target.dataset.f;working[i].sets[j][f]=e.target.value}));
+    $("exerciseList").querySelectorAll("[data-add]").forEach(b=>b.addEventListener("click",()=>{working[+b.dataset.add].sets.push({kg:"",reps:""});render()}));
+    $("exerciseList").querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{const [i,j]=b.dataset.del.split(",").map(Number);if(working[i].sets.length>1)working[i].sets.splice(j,1);render()}));
+    $("exerciseList").querySelectorAll(".remove").forEach(b=>b.addEventListener("click",()=>{working.splice(+b.dataset.i,1);render()}));
+  }
+  function finish(){
+    const cleaned=working.map(e=>({name:e.name,sets:e.sets.filter(s=>Number(s.kg)>0&&Number(s.reps)>0).map(s=>({kg:Number(s.kg),reps:Number(s.reps)}))})).filter(e=>e.sets.length);
+    if(!cleaned.length){alert("Enter at least one weight and rep count before finishing.");return}
+    db.history.unshift({id:Date.now(),date:new Date().toISOString(),split,exercises:cleaned});
+    save(); alert("Workout saved ✓"); show("home");
+  }
+  function renderHistory(){
+    const el=$("historyList");el.innerHTML="";
+    if(!db.history.length){el.innerHTML='<div class="empty">No workouts logged yet.</div>';return}
+    db.history.forEach(w=>{
+      const d=new Date(w.date), item=document.createElement("div");item.className="history-item";
+      item.innerHTML=`<div class="history-date">${d.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"})}</div><div class="history-type">${esc(w.split)} · ${d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})}</div>${w.exercises.map(e=>`<div class="history-line"><b>${esc(e.name)}</b><br>${esc(fmtSets(e.sets))}</div>`).join("")}`;
+      el.appendChild(item);
+    });
+  }
+  function exportData(){
+    const blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download="ppl-workout-backup.json";a.click();URL.revokeObjectURL(url);
+  }
+  function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+  document.querySelectorAll("[data-split]").forEach(b=>b.addEventListener("click",()=>start(b.dataset.split)));
+  $("backBtn").addEventListener("click",()=>show("home"));
+  $("finishBtn").addEventListener("click",finish);
+  $("historyBtn").addEventListener("click",()=>{renderHistory();show("history")});
+  $("historyBack").addEventListener("click",()=>show("home"));
+  $("exportBtn").addEventListener("click",exportData);
+  $("clearBtn").addEventListener("click",()=>{if(confirm("Delete every saved workout? This cannot be undone.")){db.history=[];save();renderHistory()}});
+  $("addExerciseBtn").addEventListener("click",()=>{$("exerciseInput").value="";$("modal").classList.add("open");$("exerciseInput").focus()});
+  $("cancelModal").addEventListener("click",()=>$("modal").classList.remove("open"));
+  $("saveExercise").addEventListener("click",()=>{
+    const n=$("exerciseInput").value.trim();if(!n)return;
+    if(!db.custom[split])db.custom[split]=[];
+    if(!db.custom[split].includes(n)){db.custom[split].push(n);save()}
+    working.push({name:n,sets:[{kg:"",reps:""}]});$("modal").classList.remove("open");render();
+  });
+})();
+</script>
+</body>
+</html>
