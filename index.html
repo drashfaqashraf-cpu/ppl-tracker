@@ -145,7 +145,7 @@ input:focus{border-color:#9aa0aa}
     Pull:["Lat Pulldown","Seated Row","Cable High Row","Bicep Curl","Hammer Curl","Rear Delts / Face Pull"],
     Legs:["Leg Press","Leg Curl","Leg Extension"]
   };
-  function fresh(){return {history:[],custom:{},draft:null,prs:{}}}
+  function fresh(){return {history:[],custom:{},draft:null,drafts:{},prs:{}}}
   let db;
   try{db=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){db=null}
   if(!db){
@@ -154,7 +154,7 @@ input:focus{border-color:#9aa0aa}
       db=old?{history:old.history||[],custom:old.custom||{},draft:null,prs:{}}:fresh();
     }catch(e){db=fresh()}
   }
-  db.history=db.history||[];db.custom=db.custom||{};db.prs=db.prs||{};
+  db.history=db.history||[];db.custom=db.custom||{};db.drafts=db.drafts||{};db.prs=db.prs||{};
   let split="",working=[],startedAt=null,timer=null;
   let restRemaining=120,restTimer=null;
 
@@ -195,18 +195,35 @@ input:focus{border-color:#9aa0aa}
   function startTimer(){clearInterval(timer);timer=setInterval(updateTimer,1000);updateTimer()}
   function saveDraft(){
     if(!split)return;
-    db.draft={split,startedAt,exercises:working};
+    // Keep an unfinished workout for EACH split, so switching Push/Pull/Legs
+    // never overwrites the other split's in-progress work.
+    db.drafts=db.drafts||{};
+    db.drafts[split]={split,startedAt,exercises:working};
+    // Backward compatibility with older V3 data.
+    db.draft=db.drafts[split];
     persist();
     $("saveStatus").textContent="● Autosaved";
   }
   function loadDraft(){
-    if(!db.draft)return;
-    split=db.draft.split;startedAt=db.draft.startedAt;working=db.draft.exercises||[];
+    db.drafts=db.drafts||{};
+    // Migrate the old single-draft format into the appropriate split.
+    if(db.draft && db.draft.split && !db.drafts[db.draft.split]) db.drafts[db.draft.split]=db.draft;
+    const keys=Object.keys(db.drafts);
+    if(!keys.length)return;
+    const d=db.drafts[keys[0]];
+    split=d.split;startedAt=d.startedAt;working=d.exercises||[];
     $("workoutTitle").textContent=split.toUpperCase();setRest(120);render();startTimer();show("workout");
   }
   function start(s){
-    split=s;startedAt=Date.now();
-    working=namesFor(s).map(n=>({name:n,sets:[{kg:"",reps:""}]}));
+    db.drafts=db.drafts||{};
+    split=s;
+    const saved=db.drafts[s];
+    if(saved){
+      startedAt=saved.startedAt;working=saved.exercises||[];
+    }else{
+      startedAt=Date.now();
+      working=namesFor(s).map(n=>({name:n,sets:[{kg:"",reps:""}]}));
+    }
     saveDraft();$("workoutTitle").textContent=s.toUpperCase();setRest(120);render();startTimer();show("workout");
   }
   function render(){
@@ -261,6 +278,7 @@ input:focus{border-color:#9aa0aa}
       if(oneRepMax>old){db.prs[e.name]=oneRepMax;newPRs++}
     }));
     db.history.unshift({id:Date.now(),date:new Date().toISOString(),split,exercises:cleaned,volume,duration,newPRs});
+    if(db.drafts)delete db.drafts[split];
     db.draft=null;persist();clearInterval(timer);timer=null;clearInterval(restTimer);restTimer=null;
     alert(`Workout saved ✓${newPRs?"\\nNew PRs: "+newPRs:""}`);
     updateHome();show("home");
@@ -332,5 +350,16 @@ input:focus{border-color:#9aa0aa}
   updateHome();
 })();
 </script>
+
+<footer class="copyright">© 2026 Ashfaq Ashraf. All rights reserved.</footer>
+<style>
+  .copyright{
+    text-align:center;
+    padding:18px 12px 28px;
+    font-size:12px;
+    opacity:.55;
+  }
+</style>
+
 </body>
 </html>
